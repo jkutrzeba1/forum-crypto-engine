@@ -16,6 +16,7 @@
             return {
                 isSignedIn: false,
                 cattree: {},
+                cattreesnap: null,
                 walletReady: false,
                 activeView: "maincat",
                 topics: [],
@@ -51,7 +52,36 @@
                 .then((result)=>{
 
                     let {cattree, idx} = result;
-                    console.log(idx);
+
+                    let O = JSON.stringify(cattree);
+                    this.cattreesnap = JSON.parse(O);
+
+                    let q = [];
+                    let qidx = 0;
+
+                    q.push(cattree);
+
+                    cattree.breadcrumbs = [{label: "Root", catref: cattree}];
+
+                    while(qidx<q.length){
+
+                        console.log(q[qidx]);
+
+                        for(let i = 0; i<q[qidx].childs.length; i++){
+
+                            q[qidx].childs[i].breadcrumbs = q[qidx].breadcrumbs.concat({
+                                label: q[qidx].childs[i].title,
+                                catref: q[qidx].childs[i]
+                            });
+
+                            q.push(q[qidx].childs[i]);
+
+                        }
+
+                        qidx++;
+
+                    }
+
                     this.cattree = cattree;
                     this.$admin.idx = idx;
                     this.walletReady = true;
@@ -129,9 +159,9 @@
         <a v-if="isAdmin" @click="goToCatSettings"><img class="btn-big" src="./assets/settings.svg"/></a>
 
         <Cat v-if="activeView=='maincat'" :cattree="cattree" @childcat="(cat)=>{goToChildCatView(cat)}"/>
-        <ChildCat v-if="activeView=='childcat'" :cat="curCat" :topics="topics" @childcat="(cat)=>{goToChildCatView(cat)}" @topic="(topic)=>{this.goToTopicView(topic)}"/>
+        <ChildCat v-if="activeView=='childcat'" :cat="curCat" :topics="topics" @maincat="()=>{this.activeView='maincat'}" @topic="(topic)=>{this.goToTopicView(topic)}"/>
         <Topic v-if="activeView=='topic'" :topic="curTopic" :posts="posts"/>
-        <CatSettings v-if="activeView=='catsettings'" :cattree="cattree" />
+        <CatSettings v-if="activeView=='catsettings'" :cattree="cattreesnap" />
 
     </div>
 </template>

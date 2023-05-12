@@ -51,6 +51,10 @@
             },
             goToChildCat(cat){
 
+                if(cat.breadcrumbs.length==1){
+                    this.$emit("maincat");
+                }
+
                 this.activeCat = cat;
 
                 this.$wallet.viewMethod({
@@ -107,6 +111,12 @@
     <div>
         <TopicNew v-if="curView=='newtopic'" :cat="activeCat"/>
         <template v-else-if="curView=='topiclist'">
+            <div class="breadcrumb">
+                <div v-for="(bc,index) in activeCat.breadcrumbs" >
+                    <a @click="()=>{goToChildCat(bc.catref)}">{{bc.label}}</a>
+                    <span v-if="index<activeCat.breadcrumbs.length-1" class="delimiter">&nbsp;>>&nbsp;</span>
+                </div>
+            </div>
             <div v-if="hasChildBoards">
                 <div class="maincat">Child boards</div>
 
@@ -141,6 +151,27 @@
 </template>
 
 <style>
+    .breadcrumb{
+        display: inline-block;
+        font-size: 12px;
+        margin-left: 12px;
+        margin-top: 12px;
+    }
+    .breadcrumb > div{
+        display: inline-block;
+    }
+    .breadcrumb a{
+        color: #b76a32;
+    }
+    .breadcrumb a:hover{
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .breadcrumb .delimiter{
+        font-size: 9px;
+        position: relative;
+        top: -1px;
+    }
     .topics-panel{
         margin-top: 20px;
     }
