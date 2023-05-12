@@ -15,13 +15,15 @@ class Post{
 }
 
 class Topic{
-  constructor(author: string, title: string, postid: number){
+  constructor(author: string, title: string, postid: number, next: number, catidx: number){
     this.author = author;
     this.title = title;
     this.beg = postid;
     this.end = postid;
-    this.next = -1;
+    this.next = next;
+    this.prev = -1;
     this.postsCnt = 1;
+    this.catidx = catidx;
   }
 
   author: string;
@@ -30,19 +32,19 @@ class Topic{
   beg: number;
   end: number;
   next: number;
+  prev: number;
   postsCnt: number;
+  catidx: number;
 }
 
 class Category{
 
   constructor(){
     this.beg = -1;
-    this.end = -1;
     this.topicsCnt = 0;
   }
 
   beg: number;
-  end: number;
   topicsCnt: number;
 
 }
@@ -138,6 +140,27 @@ class NearForum {
 
     topic.end = this.posts.length;
     topic.postsCnt++;
+
+    let category = this.categories.get(topic.catidx);
+    if(category==null){
+      throw new Error("INVALID");
+    }
+
+    if(topic.prev!=-1){
+      let topicPrev = this.topics.get(topic.prev);
+      topicPrev.next = topic.next;
+      this.topics.replace(topic.prev, topicPrev);
+    }
+    if(topic.next!=-1){
+      let topicNext = this.topics.get(topic.next);
+      topicNext.prev = topic.prev;
+      this.topics.replace(topic.next, topicNext);
+    }
+
+    topic.next = category.beg;
+    category.beg = topicidx;
+
+    this.categories.replace(topic.catidx, category);
     this.topics.replace(topicidx, topic);
 
     this.posts.push(new Post(caller, content));
@@ -167,26 +190,24 @@ class NearForum {
 
     let bytesInitial = near.storageUsage();
 
-    if(category.beg == -1 ){
-      category.beg = this.topics.length;
-      category.end = this.topics.length;
-    }
-    else{
+    let topicAtTopIdx = category.beg;
 
-      let prevTopic = this.topics.get(category.end);
-      prevTopic.next = this.topics.length;
+    if(topicAtTopIdx!=-1){
 
-      this.topics.replace(category.end, prevTopic);
+      let topicAtTop = this.topics.get(topicAtTopIdx);
+      topicAtTop.prev = this.topics.length;
 
-      category.end = this.topics.length;
+      this.topics.replace(topicAtTopIdx, topicAtTop);
 
     }
+
+    category.beg = this.topics.length;
 
     category.topicsCnt++;
 
     this.categories.replace(catidx, category);
 
-    this.topics.push( new Topic(caller, title, this.posts.length ));
+    this.topics.push( new Topic(caller, title, this.posts.length, topicAtTopIdx, catidx ));
     this.posts.push( new Post(caller, content) );
 
     let bytesUsed = BigInt(near.storageUsage()-bytesInitial);

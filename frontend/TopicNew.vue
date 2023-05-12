@@ -16,7 +16,9 @@
                 let subjectBytes = new TextEncoder().encode(this.subject).length;
                 let textBytes = new TextEncoder().encode(this.text).length;
 
-                let bytesUsed = this.$wallet.accountId.length*2 + subjectBytes + textBytes + 200;
+                let bytesUsed = this.$wallet.accountId.length*2 + subjectBytes + textBytes + 220;
+
+                console.log(bytesUsed);
 
                 this.$wallet.viewMethod({
                     contractId: this.$wallet.CONTRACT_ADDRESS,

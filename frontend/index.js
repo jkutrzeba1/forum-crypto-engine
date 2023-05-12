@@ -4,18 +4,18 @@ import App from './App.vue'
 import { Wallet } from './near-wallet';
 
 if (process.env.NODE_ENV === "development") {
-    globalThis.__VUE_OPTIONS_API__ = true
-    globalThis.__VUE_PROD_DEVTOOLS__ = true;
- } else {
-    // different values for production.
-    globalThis.__VUE_OPTIONS_API__ = false;
-    globalThis.__VUE_PROD_DEVTOOLS__ = false;
- }
+   globalThis.__VUE_OPTIONS_API__ = true
+   globalThis.__VUE_PROD_DEVTOOLS__ = true;
+} else {
+   // different values for production.
+   globalThis.__VUE_OPTIONS_API__ = false;
+   globalThis.__VUE_PROD_DEVTOOLS__ = false;
+}
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_NAME;
 
-let wallet = new Wallet({network: 'mainnet'});
-wallet.CONTRACT_ADDRESS = "forum-crypto.near";
+let wallet = new Wallet({network: 'testnet'});
+wallet.CONTRACT_ADDRESS = CONTRACT_ADDRESS;
 
 const app = createApp(App);
 

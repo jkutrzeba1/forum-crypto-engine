@@ -10,4 +10,4 @@ fi
 echo ">> Deploying contract"
 
 # https://docs.near.org/tools/near-cli#near-dev-deploy
-rm -rf neardev && near dev-deploy --wasmFile build/hello_near.wasm
+rm -rf neardev && near dev-deploy --wasmFile build/forum_crypto.wasm
