@@ -2,16 +2,19 @@
 import { NearBindgen, near, call, view, Vector, initialize, bytes } from 'near-sdk-js';
 
 class Post{
-  constructor(author: string, content: string){
+  constructor(author: string, content: string, prev: number){
     this.author = author;
     this.content = content;
     this.next = -1;
+    this.prev = prev;
+    this.deleted = false;
   }
 
   author: string;
   content: string;
   next: number;
-
+  prev: number;
+  deleted: boolean;
 }
 
 class Topic{
@@ -134,6 +137,8 @@ class NearForum {
 
     let bytesInitial = near.storageUsage();
 
+    let lastPostIdx = topic.end;
+
     let prevPost = this.posts.get(topic.end);
     prevPost.next =this.posts.length;
     this.posts.replace(topic.end, prevPost);
@@ -163,7 +168,7 @@ class NearForum {
     this.categories.replace(topic.catidx, category);
     this.topics.replace(topicidx, topic);
 
-    this.posts.push(new Post(caller, content));
+    this.posts.push(new Post(caller, content, lastPostIdx));
 
     let bytesUsed = BigInt(near.storageUsage() - bytesInitial);
 
@@ -208,7 +213,7 @@ class NearForum {
     this.categories.replace(catidx, category);
 
     this.topics.push( new Topic(caller, title, this.posts.length, topicAtTopIdx, catidx ));
-    this.posts.push( new Post(caller, content) );
+    this.posts.push( new Post(caller, content, -1) );
 
     let bytesUsed = BigInt(near.storageUsage()-bytesInitial);
 
@@ -296,6 +301,69 @@ class NearForum {
     }
 
     return postsOut;
+  }
+
+  @call({payableFunction: true})
+  deletePost({postShift, idx, isTopicIdx = true }:{postShift:number, idx: number, isTopicIdx: boolean}){
+
+    let caller = near.predecessorAccountId();
+
+    let adminidx = this.admins.toArray().indexOf(caller);
+    if(adminidx==-1){
+      throw new Error("NOT ADMIN");
+    }
+
+    if(isTopicIdx==true && idx==1){
+      throw new Error("TOPIC");
+    }
+
+    let firstPostIdx;
+
+    if(isTopicIdx == false){
+      firstPostIdx = idx;
+    }
+    else{
+
+      let topic = this.topics.get(idx);
+      if(topic==null){
+        throw new Error("INVALID");
+      }
+
+      firstPostIdx = topic.beg;
+
+    }
+
+    let postIdx = firstPostIdx;
+    let post;
+
+    for(let i = 0; i<postShift-1; i++){
+
+      post = this.posts.get(postIdx);
+      postIdx = post.next;
+
+    }
+
+    post = this.posts.get(postIdx);
+
+    post.deleted = true;
+    this.posts.replace(postIdx, post);
+
+    if(post.next!=-1){
+
+      let postNext = this.posts.get(post.next);
+      postNext.prev = post.prev;
+      this.posts.replace(post.next, postNext);
+
+    }
+    if(post.prev!=-1){
+
+      let postPrev = this.posts.get(post.prev);
+      postPrev.next = post.next;
+      this.posts.replace(post.prev, postPrev);
+
+    }
+
+
   }
 
   @call({payableFunction: true})

@@ -12,7 +12,8 @@
                 curPage: 1,
                 totalPages: 1,
                 activeView: "posts",
-                postsArr: []
+                postsArr: [],
+                firstPostIdx: -1
             }
         },
         computed:{
@@ -39,6 +40,7 @@
                 .then((posts)=>{
 
                     this.curPage++;
+                    this.firstPostIdx = this.postsArr[this.postsArr.length-1].next;
                     
                     this.postsArr = posts.map((post)=>{
 
@@ -49,7 +51,32 @@
 
                 })
 
+            },
+            deletePost(post, index){
+
+                let isTopicIdx, idx, postShift;
+
+                postShift = index+1;
+
+                if(this.firstPostIdx != -1){
+                    isTopicIdx = false;
+                    idx = this.firstPostIdx;
+                }
+                else{
+                    isTopicIdx = true;
+                    idx = this.topic.topicidx
+                }
+
+                this.$wallet.callMethod({
+                    contractId: this.$wallet.CONTRACT_ADDRESS,
+                    method: "deletePost",
+                    args:{
+                        isTopicIdx, idx, postShift
+                    }
+                })
+
             }
+
         },
         mounted(){
 
@@ -89,25 +116,41 @@
                 Page {{ curPage }} from {{ totalPages }} 
             </div>
             <a :class="{nextpage: hasNextPage, nextpagedisabled: !hasNextPage}" @click="nextPage">Next page >></a>
-            <div class="post" v-for="post in postsArr">
+            <div class="post" v-for="(post,index) in postsArr">
                 <div class="author">
                     <img src="./assets/user.svg"/>
                     <span class="label">{{ post.author }}</span>
                 </div>
-                <div class="content" v-html="post.content">
+                <div class="content">
+                    <div v-html="post.content">
 
+                    </div>
+                    <div v-if="$admin.idx!=-1 && !(firstPostIdx==-1 && index==0)" class="post-buttons">
+                        <img @click="()=>{deletePost(post, index)}" src="./assets/trash.svg"/>
+                    </div>
                 </div>
+
             </div>
         </template>
     </div>
 </template>
 
 <style>
+    .post-buttons{
+        margin-top: 15px;
+    }
+    .post-buttons img{
+        width: 18px;
+        height: 18px;
+    }
+    .post-buttons img:hover{
+        cursor: pointer;
+    }
     .post{
+        padding: 8px 8px 0 8px;
         min-height: 60px;
         border: 1px solid black;
         border-bottom: 0;
-        padding: 10px 10px
     }
     .post:last-child{
         border-bottom: 1px solid black;

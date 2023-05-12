@@ -11,7 +11,7 @@
             submit(){
                 let bytesContent = new TextEncoder().encode(this.content).length;
 
-                let bytesUsed = this.$wallet.accountId.length + bytesContent + 100;
+                let bytesUsed = this.$wallet.accountId.length + bytesContent + 150;
 
                 console.log(bytesUsed);
 
