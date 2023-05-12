@@ -13,12 +13,13 @@
                 curView: 'topiclist',
                 curPage: 1,
                 totalPages: 1,
-                topicsArr: this.topics
+                topicsArr: this.topics,
+                activeCat: this.cat
             }
         },
         computed: {
             hasChildBoards(){
-                if(this.cat.childs.length>0) return true;
+                if(this.activeCat.childs.length>0) return true;
                 return false;
             },
             hasNextPage(){
@@ -47,6 +48,40 @@
                     this.curPage++;
                 })
 
+            },
+            goToChildCat(cat){
+
+                this.activeCat = cat;
+
+                this.$wallet.viewMethod({
+                    contractId: this.$wallet.CONTRACT_ADDRESS,
+                    method: 'catMeta',
+                    args:{
+                        catidx: cat.id
+                    }
+                })
+                .then((response)=>{
+
+                    this.totalPages = parseInt(response.totalPages / 20) + (response.totalPages % 20 != 0 ? 1:0);
+
+                })
+                .then(()=>{
+
+                    this.$wallet.viewMethod({
+                        method: "getTopics",
+                        args: {
+                            catidx: cat.id
+                        },
+                        contractId: this.$wallet.CONTRACT_ADDRESS
+                    })
+                    .then((topics)=>{
+
+                        this.topicsArr = topics;
+
+                    })
+
+                });
+
             }
         },
         mounted(){
@@ -70,16 +105,16 @@
 
 <template>
     <div>
-        <TopicNew v-if="curView=='newtopic'" :cat="cat"/>
+        <TopicNew v-if="curView=='newtopic'" :cat="activeCat"/>
         <template v-else-if="curView=='topiclist'">
             <div v-if="hasChildBoards">
                 <div class="maincat">Child boards</div>
 
-                <div class="childcat" v-for="cat in cat.childs">
+                <div class="childcat" v-for="catItem in activeCat.childs">
                     <img src="./assets/childcat.svg"/>
                     <div class="row">
-                        <a class="link" @click="()=>{ this.$emit('childcat', cat) }">{{ cat.title }}</a> <br/>
-                        <span class="desc">{{ cat.desc }}</span>
+                        <a class="link" @click="()=>{goToChildCat(catItem)}">{{ catItem.title }}</a> <br/>
+                        <span class="desc">{{ catItem.desc }}</span>
                     </div>
                 </div>
 
