@@ -161,9 +161,11 @@ class NearForum {
       topicNext.prev = topic.prev;
       this.topics.replace(topic.next, topicNext);
     }
-
-    topic.next = category.beg;
-    category.beg = topicidx;
+    
+    if(category.beg!=topicidx){
+      topic.next = category.beg;
+      category.beg = topicidx;
+    }
 
     this.categories.replace(topic.catidx, category);
     this.topics.replace(topicidx, topic);
