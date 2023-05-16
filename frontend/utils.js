@@ -16,7 +16,7 @@ function uint8arr_to_hexstr(arr){
     return hexOut;
 }
 
-const THIRTY_TGAS = '60000000000000';
+const THIRTY_TGAS = '300000000000000';
 const NO_DEPOSIT = '0';
 
 function Account(accId, createAccessKeyFor){
@@ -68,9 +68,7 @@ Account.prototype.callMethod = function({method, args = {}, contractId, deposit 
 
         let f = providers.getTransactionLastResult(transaction);
 
-        console.log(f);
-
-        return f;
+        return transaction;
     })
 
 }

@@ -74,6 +74,28 @@ class NearForum {
   admins: Vector<string> = new Vector<string>("a");
   categories: Vector<Category> = new Vector<Category>("c");
 
+  @call({payableFunction: true})
+  reset(){
+
+    let caller = near.predecessorAccountId();
+
+    let idx = this.admins.toArray().indexOf(caller);
+    if(idx==-1){
+      throw new Error("NOT ADMIN");
+    }
+
+    this.posts.clear();
+    this.topics.clear();
+    this.users.clear();
+    this.categories.clear();
+
+    this.categoriestree = {
+      idcnt: 0,
+      childs: []
+    }
+
+  }
+
   @initialize({})
   init({adminId}:{adminId:string}){
 
@@ -303,6 +325,55 @@ class NearForum {
     }
 
     return postsOut;
+  }
+
+  @call({payableFunction:true})
+  editPost({postShift, idx, isTopicIdx = true, content }:{postShift:number, idx: number, isTopicIdx: boolean, content: string}){
+
+    let caller = near.predecessorAccountId();
+
+    let adminidx = this.admins.toArray().indexOf(caller);
+    if(adminidx==-1){
+      throw new Error("NOT ADMIN");
+    }
+
+    let firstPostIdx;
+
+    if(isTopicIdx == false){
+      firstPostIdx = idx;
+    }
+    else{
+
+      let topic = this.topics.get(idx);
+      if(topic==null){
+        throw new Error("INVALID");
+      }
+
+      firstPostIdx = topic.beg;
+
+    }
+
+    let postIdx = firstPostIdx;
+    let post;
+
+    for(let i = 0; i<postShift-1; i++){
+
+      post = this.posts.get(postIdx);
+      postIdx = post.next;
+
+    }
+
+    let bytes = near.storageUsage();
+
+    post = this.posts.get(postIdx);
+
+    post.content = content;
+
+    this.posts.replace(postIdx, post);
+
+
+    return BigInt(near.storageUsage()-bytes).toString();
+
   }
 
   @call({payableFunction: true})

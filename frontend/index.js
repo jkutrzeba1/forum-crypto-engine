@@ -3,6 +3,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { Wallet } from './near-wallet';
 
+/*
 if (process.env.NODE_ENV === "development") {
    globalThis.__VUE_OPTIONS_API__ = true
    globalThis.__VUE_PROD_DEVTOOLS__ = true;
@@ -11,11 +12,14 @@ if (process.env.NODE_ENV === "development") {
    globalThis.__VUE_OPTIONS_API__ = false;
    globalThis.__VUE_PROD_DEVTOOLS__ = false;
 }
+*/
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_NAME;
 
-let wallet = new Wallet({network: 'testnet'});
-wallet.CONTRACT_ADDRESS = CONTRACT_ADDRESS;
+console.log("XX");
+
+let wallet = new Wallet({network: 'mainnet'});
+wallet.CONTRACT_ADDRESS = "forum-blockchain.near";
 
 const app = createApp(App);
 

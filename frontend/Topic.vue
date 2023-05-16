@@ -13,7 +13,8 @@
                 totalPages: 1,
                 activeView: "posts",
                 postsArr: [],
-                firstPostIdx: -1
+                firstPostIdx: -1,
+                postEdited: null
             }
         },
         computed:{
@@ -25,6 +26,16 @@
         methods:{
             reply(){
                 this.activeView = "reply";
+            },
+            editPost(post, index){
+
+                this.activeView = "reply";
+                post.postShift = index+1;
+                post.isTopicIdx = this.firstPostIdx != -1 ? false : true;
+                post.idx = this.firstPostIdx != -1 ? this.firstPostIdx : this.topic.topicidx;
+
+                this.postEdited = post;
+
             },
             nextPage(){
 
@@ -108,7 +119,7 @@
     <div>
         <div class="maincat">{{ topic.title }}</div>
 
-        <NewPost v-if="activeView=='reply'" :topic="topic" />
+        <NewPost v-if="activeView=='reply'" :topic="topic" :post="postEdited" />
         <template v-if="activeView=='posts'">
 
             <button @click="reply" class="btn btn-main" :style="{fontSize: '9px', margin: '8px 3px'}">REPLY</button>
@@ -127,6 +138,7 @@
                     </div>
                     <div v-if="$admin.idx!=-1 && !(firstPostIdx==-1 && index==0)" class="post-buttons">
                         <img @click="()=>{deletePost(post, index)}" src="./assets/trash.svg"/>
+                        <img @click="()=>{editPost(post, index)}" src="./assets/edit.svg"/>
                     </div>
                 </div>
 
