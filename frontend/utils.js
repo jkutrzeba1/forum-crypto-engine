@@ -127,4 +127,37 @@ Account.prototype.createAccount = function(acc_name, nearAmount){
 
 }
 
-export {uint8arr_to_hexstr, createAccount, Account};
+function parseAmountDecimals(str, decimals){
+
+    let fraction;
+    let integer;
+
+    if(str.length<=decimals){
+        integer = "0";
+        fraction = "0".repeat(decimals-str.length) + str;
+    }
+    else{
+        integer = str.substring(0, str.length-decimals);
+        fraction = str.substring( str.length-decimals ,str.length)
+    }
+
+    let zeroescnt = 0;
+
+    for(let i = fraction.length-1; i>=2; i--){
+
+        if(fraction[i] == '0'){
+            zeroescnt++;
+        }
+        else{
+            break;
+        }
+
+    }
+
+    fraction = fraction.substring(0, fraction.length-zeroescnt);
+
+    return integer + "." + fraction;
+
+}
+
+export {uint8arr_to_hexstr, createAccount, Account, parseAmountDecimals};

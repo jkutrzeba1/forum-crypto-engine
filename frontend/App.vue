@@ -4,13 +4,15 @@
     import ChildCat from './ChildCat.vue';
     import Topic from './Topic.vue';
     import CatSettings from './CatSettings.vue';
+    import Menu from './Menu.vue';
+    import WalletView from './Wallet.vue';
 
     import {createAccount, Account } from './utils.js';
 
 
     export default{
         components:{
-            ChildCat, Cat, Topic, CatSettings
+            ChildCat, Cat, Topic, CatSettings, Menu, WalletView
         },
         data(){
             return {
@@ -156,8 +158,11 @@
         <button v-if="!isSignedIn" class="btn btn-main" @click="login">LOGIN</button>
         <button v-if="isSignedIn" class="btn btn-main" @click="logout">LOGOUT</button>
 
-        <a v-if="isAdmin" @click="goToCatSettings"><img class="btn-big" src="./assets/settings.svg"/></a>
+        <Menu @goToView="(v)=>{this.activeView = v}"/>
 
+        <a v-if="isAdmin" @click="goToCatSettings"><img class="btn-big" src="./assets/settings.svg"/></a>
+        
+        <WalletView v-if="activeView=='wallet'" />
         <Cat v-if="activeView=='maincat'" :cattree="cattree" @childcat="(cat)=>{goToChildCatView(cat)}"/>
         <ChildCat v-if="activeView=='childcat'" :cat="curCat" :topics="topics" @maincat="()=>{this.activeView='maincat'}" @topic="(topic)=>{this.goToTopicView(topic)}"/>
         <Topic v-if="activeView=='topic'" :topic="curTopic" :posts="posts"/>

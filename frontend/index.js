@@ -16,10 +16,10 @@ if (process.env.NODE_ENV === "development") {
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_NAME;
 
-console.log("XX");
-
 let wallet = new Wallet({network: 'mainnet'});
+//wallet.CONTRACT_ADDRESS = "forum-blockchain.near";
 wallet.CONTRACT_ADDRESS = "forum-blockchain.near";
+wallet.FT_CONTRACT_ADDRESS = "ft_decentralisedforum.near";
 
 const app = createApp(App);
 
